@@ -8,6 +8,7 @@ import (
 
 func printResultRFS(results []Result) {
 	for _, result := range results {
+		// HANDLE DIFFERENT CASES HERE
 		if result.err > 0 {
 			log.WithField("type", result.kubeType).Error(result.namespace, "/", result.name)
 		}
@@ -17,12 +18,12 @@ func printResultRFS(results []Result) {
 func checkReadOnlyRootFS(container apiv1.Container, result *Result) {
 	if container.SecurityContext != nil {
 		if container.SecurityContext.ReadOnlyRootFilesystem == nil {
-			result.err = 1
+			result.err = EREAD_ONLY_ROOT_FS_NIL
 		} else if !*container.SecurityContext.ReadOnlyRootFilesystem {
-			result.err = 2
+			result.err = ENOT_READ_ONLY_ROOT_FS
 		}
 	} else {
-		result.err = 3
+		result.err = ESECURITY_CONTEXT_MISSING
 	}
 	return
 }

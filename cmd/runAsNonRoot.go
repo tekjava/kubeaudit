@@ -17,12 +17,12 @@ func printResultNR(results []Result) {
 func checkRunAsNonRoot(container apiv1.Container, result *Result) {
 	if container.SecurityContext != nil {
 		if container.SecurityContext.RunAsNonRoot == nil {
-			result.err = 1
+			result.err = ERUN_AS_NON_ROOT_NIL
 		} else if !*container.SecurityContext.RunAsNonRoot {
-			result.err = 2
+			result.err = E_RUN_AS_ROOT
 		}
 	} else {
-		result.err = 3
+		result.err = ESECURITY_CONTEXT_MISSING
 	}
 
 	return

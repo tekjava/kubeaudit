@@ -10,46 +10,44 @@ func checkSecurityContext(container apiv1.Container, result *Result) {
 	result.capsDropped = true
 
 	if container.SecurityContext == nil {
-		result.err = 1
+		result.err = ESECURITY_CONTEXT_MISSING
 		return
 	}
 
 	if container.SecurityContext.Capabilities == nil {
-		result.err = 2
+		result.err = ECAPABILITIES_NIL
 		return
 	}
 
 	if container.SecurityContext.Capabilities.Add != nil {
-		result.err = 3
+		result.err = E_CAPABILITIES_CHANGED
 		result.capsAdded = container.SecurityContext.Capabilities.Add
 	}
 
 	if container.SecurityContext.Capabilities.Drop == nil {
-		result.err = 3
+		result.err = E_CAPABILITIES_CHANGED
 		result.capsDropped = false
 	}
-
 	return
 }
 
 func printResultSC(results []Result) {
 	for _, result := range results {
 		switch err := result.err; err {
-		case 1:
+		case ESECURITY_CONTEXT_MISSING:
 			log.WithField("type", result.kubeType).Error(result.namespace,
 				"/", result.name)
-		case 2:
+		case ECAPABILITIES_NIL:
 			log.WithFields(log.Fields{
 				"type": result.kubeType,
 			}).Warn("Capabilities field not defined! ", result.namespace, "/", result.name)
-		case 3:
+		case ECAPABILITIES_ADDED:
 			if result.capsAdded != nil {
 				log.WithFields(log.Fields{
 					"type": result.kubeType,
 					"caps": result.capsAdded}).
 					Warn("Capabilities added to ", result.namespace, "/", result.name)
 			}
-
 			if !result.capsDropped {
 				log.WithField("type", result.kubeType).
 					Warn("No capabilities were dropped! ", result.namespace, "/", result.name)

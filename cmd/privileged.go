@@ -6,6 +6,7 @@ import (
 	apiv1 "k8s.io/api/core/v1"
 )
 
+// FIX THIS, both functionality wise and using error states correctly
 func printResultPrivileged(results []Result) {
 	for _, result := range results {
 		if result.err > 0 {
@@ -15,14 +16,19 @@ func printResultPrivileged(results []Result) {
 }
 
 func checkPrivileged(container apiv1.Container, result *Result) {
-	if container.SecurityContext != nil {
-		if container.SecurityContext.Privileged != nil && *container.SecurityContext.Privileged {
-			result.err = 1
-		}
-	} else {
-		result.err = 2
+	if container.SecurityContext == nil {
+		result.err = ESECURITY_CONTEXT_MISSING
+		return
 	}
 
+	if container.SecurityContext.Privileged == nil {
+		result.err = EPRIVILEGED_CONTAINER_NIL
+		return
+	}
+
+	if *container.SecurityContext.Privileged {
+		result.err = EPRIVILEGED_CONTAINER
+	}
 	return
 }
 

@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"os"
+	"errors"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -12,23 +12,36 @@ import (
 var imgConfig imgFlags
 
 type imgFlags struct {
-	img string
+	img  string
+	tag  string
+	name string
+}
+
+func (image *imgFlags) splitImageString() (err error) {
+	tokens := strings.Split(image, ":")
+	if len(tokens) < 2 {
+		err = errors.New("Image does not container name and tag")
+		return
+	}
+	image.name = tokens[0]
+	image.tag = tokens[1]
+	return
 }
 
 func printResultImg(results []Result) {
 	for _, result := range results {
 		switch result.err {
-		case 0:
+		case E_INFO:
 			log.WithFields(log.Fields{
 				"type": result.kubeType,
 				"tag":  result.img_tag}).Info(result.namespace,
 				"/", result.name)
-		case 1:
+		case EIMAGE_TAG_MISSING:
 			log.WithFields(log.Fields{
 				"type": result.kubeType,
 				"tag":  result.img_tag}).Error("Image tag was missing ", result.namespace,
 				"/", result.name)
-		case 2:
+		case EINCORRECT_IMAGE:
 			log.WithFields(log.Fields{
 				"type": result.kubeType,
 				"tag":  result.img_tag}).Error("Image tag was incorrect ", result.namespace,
@@ -37,44 +50,24 @@ func printResultImg(results []Result) {
 	}
 }
 
-func checkImage(container apiv1.Container, image string, result *Result) {
-	var (
-		contImg string
-		contTag string
-	)
-
-	imageLabel := strings.Split(image, ":")
-
-	if len(imageLabel) < 2 {
-		log.Error("Image tag is missing!")
-		os.Exit(1)
-	}
-
-	compImg := imageLabel[0]
-	compTag := imageLabel[1]
-
-	contImgLabel := strings.Split(container.Image, ":")
-	contImg = contImgLabel[0]
-
-	if len(contImgLabel) < 2 {
-		if compImg == contImg {
-			// Image name was proper but image tag was missing
-			result.err = 1
-		}
+func checkImage(container apiv1.Container, image imgFlags, result *Result) {
+	contImage := imgFlags{img: container.Image}
+	err := contImage.splitImageString()
+	// Image name was proper but image tag was missing
+	if err != nil && contImage.name == image.name {
+		result.err = EIMAGE_TAG_MISSING
 		return
 	}
 
-	contTag = contImgLabel[1]
-
 	if contImg == compImg && contTag != compTag {
-		result.err = 2
-		result.img_name = contImg
-		result.img_tag = contTag
+		result.err = EIMAGE_TAG_INCORRECT
+		result.img_name = contImage.name
+		result.img_tag = contImage.tag
 	}
 	return
 }
 
-func auditImages(image string, items Items) (results []Result) {
+func auditImages(image imgFlags, items Items) (results []Result) {
 	for _, item := range items.Iter() {
 		containers, result := containerIter(item)
 		for _, container := range containers {
@@ -108,6 +101,11 @@ kubeaudit image -i gcr.io/google_containers/echoserver:1.7`,
 			log.Error("Empty image name. Are you missing the image flag?")
 			return
 		}
+		err := imgConfig.splitImageString()
+		if err != nil {
+			log.Error(err)
+			return
+		}
 
 		if rootConfig.json {
 			log.SetFormatter(&log.JSONFormatter{})
@@ -133,11 +131,11 @@ kubeaudit image -i gcr.io/google_containers/echoserver:1.7`,
 			pods := getPods(kube)
 
 			wg.Add(5)
-			go auditImages(imgConfig.img, kubeAuditStatefulSets{list: statefulSets})
-			go auditImages(imgConfig.img, kubeAuditDaemonSets{list: daemonSets})
-			go auditImages(imgConfig.img, kubeAuditPods{list: pods})
-			go auditImages(imgConfig.img, kubeAuditReplicationControllers{list: replicationControllers})
-			go auditImages(imgConfig.img, kubeAuditDeployments{list: deployments})
+			go auditImages(imgConfig, kubeAuditStatefulSets{list: statefulSets})
+			go auditImages(imgConfig, kubeAuditDaemonSets{list: daemonSets})
+			go auditImages(imgConfig, kubeAuditPods{list: pods})
+			go auditImages(imgConfig, kubeAuditReplicationControllers{list: replicationControllers})
+			go auditImages(imgConfig, kubeAuditDeployments{list: deployments})
 			wg.Wait()
 		}
 	},

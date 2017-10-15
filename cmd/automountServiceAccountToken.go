@@ -9,26 +9,26 @@ func checkAutomountServiceAccountToken(result *Result) {
 
 	// Check for use of deprecated service account name
 	if result.dsa != "" {
-		result.err = 1
+		result.err = EDEPRECATED_SERVICE_ACCOUNT_NAME
+		return
 	}
 
-	if result.token != nil {
-		// automountServiceAccountToken = true, and serviceAccountName is blank (default: default)
-		if *result.token && result.sa == "" {
-			result.err = 2
-		}
-	} else {
+	if result.token == nil && result.sa == "" {
 		// automountServiceAccountToken = nil (default: true), and serviceAccountName is blank (default: default)
-		if result.sa == "" {
-			result.err = 3
-		}
+		result.err = EAUTOMOUNT_SERVICE_ACCOUNT_TOKEN_NIL
+		return
 	}
+
+	// automountServiceAccountToken = true, and serviceAccountName is blank (default: default)
+	if *result.token && result.sa == "" {
+		result.err = ENO_SERVICE_NAME
+	}
+	return
 }
 
 func printResultASAT(results []Result) {
-
 	for _, result := range results {
-		if result.dsa != "" {
+		if result.err == EDEPRECATED_SERVICE_ACCOUNT_NAME {
 			log.WithFields(log.Fields{
 				"type":               result.kubeType,
 				"namespace":          result.namespace,
@@ -37,21 +37,20 @@ func printResultASAT(results []Result) {
 				"serviceAccountName": result.sa,
 			}).Warn("deprecated serviceAccount detected (sub for serviceAccountName)")
 		}
-
-		if result.err == 2 {
+		if result.err == ENO_SERVICE_NAME {
 			log.WithFields(log.Fields{
 				"type":      result.kubeType,
 				"namespace": result.namespace,
 				"name":      result.name,
 			}).Error("automountServiceAccountToken = true with no serviceAccountName")
-		} else if result.err == 3 {
+		}
+		if result.err == EAUTOMOUNT_SERVICE_ACCOUNT_TOKEN_NIL {
 			log.WithFields(log.Fields{
 				"type":      result.kubeType,
 				"namespace": result.namespace,
 				"name":      result.name,
 			}).Error("automountServiceAccountToken nil (mounted by default) with no serviceAccountName")
 		}
-
 	}
 }
 

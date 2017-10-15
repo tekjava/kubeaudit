@@ -18,7 +18,7 @@ func checkNamespaceNetworkPolicies(netPols *networking.NetworkPolicyList) {
 		}
 	}
 
-	if len(badNetPols) != 0 {
+	if len(badNetPols) > 0 {
 		for _, netPol := range badNetPols {
 			log.WithField("type", "netpol").Error(netPol.Name)
 		}

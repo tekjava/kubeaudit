@@ -82,7 +82,7 @@ type kubeAuditReplicationControllers struct {
 }
 
 type Result struct {
-	err         int
+	err         []int
 	namespace   string
 	name        string
 	capsAdded   []apiv1.Capability
