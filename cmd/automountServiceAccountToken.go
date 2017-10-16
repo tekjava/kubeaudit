@@ -16,13 +16,13 @@ func printResultASAT(results []Result) {
 				"serviceAccount":     result.dsa,
 				"serviceAccountName": result.sa,
 			}).Warn("deprecated serviceAccount detected (sub for serviceAccountName)")
-		case ErrorServiceAccountTokenNoName:
+		case ErrorServiceAccountTokenTrueAndNoName:
 			log.WithFields(log.Fields{
 				"type":      result.kubeType,
 				"namespace": result.namespace,
 				"name":      result.name,
 			}).Error("automountServiceAccountToken = true with no serviceAccountName")
-		case ErrorServiceAccountTokenNIL:
+		case ErrorServiceAccountTokenNILAndNoName:
 			log.WithFields(log.Fields{
 				"type":      result.kubeType,
 				"namespace": result.namespace,
@@ -41,13 +41,13 @@ func checkAutomountServiceAccountToken(result *Result) {
 
 	if result.token != nil && *result.token && result.sa == "" {
 		// automountServiceAccountToken = true, and serviceAccountName is blank (default: default)
-		result.err = ErrorServiceAccountTokenNoName
+		result.err = ErrorServiceAccountTokenTrueAndNoName
 		return
 	}
 
 	if result.token == nil && result.sa == "" {
 		// automountServiceAccountToken = nil (default: true), and serviceAccountName is blank (default: default)
-		result.err = ErrorServiceAccountTokenNIL
+		result.err = ErrorServiceAccountTokenNILAndNoName
 		return
 	}
 }

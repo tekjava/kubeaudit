@@ -32,7 +32,7 @@ func TestDeploymentASAT(t *testing.T) {
 			t.Error("Test 2: Failed to identify deprecated service account name. Refer: fakeDeploymentASAT1.yml")
 		}
 
-		if result.name == "fakeDeploymentASAT2" && result.err != ErrorServiceAccountTokenNoName {
+		if result.name == "fakeDeploymentASAT2" && result.err != ErrorServiceAccountTokenTrueAndNoName {
 			t.Error("Test 3: Failed to identify automountServiceAccountToken set to true. Refer: fakeDeploymentASAT2.yml")
 		}
 	}
@@ -52,7 +52,7 @@ func TestStatefulSetASAT(t *testing.T) {
 			t.Error("Test 2: Failed to identify deprecated service account name. Refer: fakeStatefulSetASAT1.yml")
 		}
 
-		if result.name == "fakeStatefulSetASAT2" && result.err != ErrorServiceAccountTokenNoName {
+		if result.name == "fakeStatefulSetASAT2" && result.err != ErrorServiceAccountTokenTrueAndNoName {
 			t.Error("Test 3: Failed to identify automountServiceAccountToken set to true. Refer: fakeStatefulSetASAT2.yml")
 		}
 	}
@@ -72,7 +72,7 @@ func TestDaemonSetASAT(t *testing.T) {
 			t.Error("Test 2: Failed to identify deprecated service account name. Refer: fakeDaemonSetASAT1.yml")
 		}
 
-		if result.name == "fakeDaemonSetASAT2" && result.err != ErrorServiceAccountTokenNoName {
+		if result.name == "fakeDaemonSetASAT2" && result.err != ErrorServiceAccountTokenTrueAndNoName {
 			t.Error("Test 3: Failed to identify automountServiceAccountToken set to true. Refer: fakeDaemonSetASAT2.yml")
 		}
 	}
@@ -92,7 +92,7 @@ func TestPodASAT(t *testing.T) {
 			t.Error("Test 2: Failed to identify deprecated service account name. Refer: fakePodASAT1.yml")
 		}
 
-		if result.name == "fakePodASAT2" && result.err != ErrorServiceAccountTokenNoName {
+		if result.name == "fakePodASAT2" && result.err != ErrorServiceAccountTokenTrueAndNoName {
 			t.Error("Test 3: Failed to identify automountServiceAccountToken set to true. Refer: fakePodASAT2.yml")
 		}
 	}
@@ -112,7 +112,7 @@ func TestReplicationControllerASAT(t *testing.T) {
 			t.Error("Test 2: Failed to identify deprecated service account name. Refer: fakeReplicationControllerASAT1.yml")
 		}
 
-		if result.name == "fakeReplicationControllerASAT2" && result.err != ErrorServiceAccountTokenNoName {
+		if result.name == "fakeReplicationControllerASAT2" && result.err != ErrorServiceAccountTokenTrueAndNoName {
 			t.Error("Test 3: Failed to identify automountServiceAccountToken set to true. Refer: fakeReplicationControllerASAT2.yml")
 		}
 	}

@@ -8,6 +8,6 @@ const (
 	ErrorReadOnlyRootFilesystemNIL
 	ErrorReadOnlyRootFilesystemFalse
 	ErrorServiceAccountTokenDeprecated
-	ErrorServiceAccountTokenNoName
-	ErrorServiceAccountTokenNIL
+	ErrorServiceAccountTokenTrueAndNoName
+	ErrorServiceAccountTokenNILAndNoName
 )
