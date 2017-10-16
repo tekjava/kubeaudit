@@ -7,4 +7,7 @@ const (
 	ErrorSecurityContextNIL
 	ErrorReadOnlyRootFilesystemNIL
 	ErrorReadOnlyRootFilesystemFalse
+	ErrorServiceAccountTokenDeprecated
+	ErrorServiceAccountTokenNoName
+	ErrorServiceAccountTokenNIL
 )
