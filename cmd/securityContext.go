@@ -36,26 +36,35 @@ func printResultSC(results []Result) {
 	for _, result := range results {
 		switch err := result.err; err {
 		case ErrorSecurityContextNIL:
-			log.WithField("type", result.kubeType).Error(result.namespace,
-				"/", result.name)
+			log.WithFields(log.Fields{
+				"type":      result.kubeType,
+				"tag":       result.imgTag,
+				"namespace": result.namespace,
+				"name":      result.name}).Error("Security context is nil!")
 		case ErrorCapabilitiesNIL:
 			log.WithFields(log.Fields{
-				"type": result.kubeType,
-			}).Warn("Capabilities field not defined! ", result.namespace, "/", result.name)
+				"type":      result.kubeType,
+				"tag":       result.imgTag,
+				"namespace": result.namespace,
+				"name":      result.name}).Error("Capabilities field not defined!")
 		case ErrorCapabilitiesAddedOrNotDropped:
 			if result.capsAdded != nil {
 				log.WithFields(log.Fields{
-					"type": result.kubeType,
-					"caps": result.capsAdded}).
-					Warn("Capabilities added to ", result.namespace, "/", result.name)
+					"type":      result.kubeType,
+					"tag":       result.imgTag,
+					"namespace": result.namespace,
+					"name":      result.name,
+					"caps":      result.capsAdded}).Error("Capabilities added!")
 			}
 
 			if !result.capsDropped {
-				log.WithField("type", result.kubeType).
-					Warn("No capabilities were dropped! ", result.namespace, "/", result.name)
+				log.WithFields(log.Fields{
+					"type":      result.kubeType,
+					"tag":       result.imgTag,
+					"namespace": result.namespace,
+					"name":      result.name}).Error("No capabilities were dropped!")
 			}
 		}
-
 	}
 }
 
